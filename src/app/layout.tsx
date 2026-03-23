@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Texas fishing map — water & spots",
+  title: "ReelMap US — United States fishing map & catch log",
   description:
-    "Texas rivers, lakes, and fishing spots. Community pins with TPWD regulation links.",
+    "Satellite map of U.S. waters, community fishing spots, and catch photo pins. Sign in to contribute.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-screen flex-col">{children}</body>
+      <body className="flex min-h-screen flex-col font-sans antialiased">{children}</body>
     </html>
   );
 }

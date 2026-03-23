@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import {
   createBrowserSupabase,
   isSupabaseConfigured,
 } from "@/lib/supabase/client";
+import { formCardClass, formInputClass, formLabelClass } from "@/components/ui/form-classes";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME = new Set([
@@ -163,25 +165,31 @@ export function AddCatchPanel({
 
   if (!user) {
     return (
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">
-        Sign in to add photos of your catches as map pins.
-      </p>
+      <div className={formCardClass}>
+        <p className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+          <Link
+            href="/auth/sign-in"
+            className="font-semibold text-violet-800 underline hover:text-violet-900 dark:text-violet-400"
+          >
+            Sign in
+          </Link>{" "}
+          to add photos of your catches as map pins.
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 text-sm">
-      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-        Catch collection
-      </p>
+    <div className={`${formCardClass} flex flex-col gap-3 text-sm`}>
+      <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">Catch collection</p>
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onTogglePickCatch}
           className={
             pickCatchMode
-              ? "rounded-md bg-violet-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-700"
-              : "rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              ? "rounded-xl bg-violet-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-violet-700"
+              : "rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-800 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
           }
         >
           {pickCatchMode ? "Cancel catch pin" : "Place catch on map"}
@@ -206,13 +214,13 @@ export function AddCatchPanel({
         </p>
       ) : null}
 
-      <form className="flex flex-col gap-2" onSubmit={submit}>
-        <label className="text-xs text-zinc-600 dark:text-zinc-400">
+      <form className="flex flex-col gap-2.5" onSubmit={submit}>
+        <label className={formLabelClass}>
           Photo <span className="text-red-600 dark:text-red-400">*</span>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
-            className="mt-1 block w-full text-xs text-zinc-700 file:mr-2 file:rounded-md file:border-0 file:bg-violet-100 file:px-2 file:py-1 file:text-violet-900 dark:text-zinc-300 dark:file:bg-violet-950 dark:file:text-violet-100"
+            className="mt-1.5 block w-full cursor-pointer text-xs text-zinc-700 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-violet-100 file:px-3 file:py-2 file:text-xs file:font-medium file:text-violet-900 hover:file:bg-violet-200 dark:text-zinc-300 dark:file:bg-violet-950 dark:file:text-violet-100 dark:hover:file:bg-violet-900"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
         </label>
@@ -220,31 +228,33 @@ export function AddCatchPanel({
           placeholder="Title (optional)"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+          className={formInputClass}
         />
         <textarea
           placeholder="Notes (optional)"
           rows={2}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+          className={`${formInputClass} resize-y`}
         />
         <input
           placeholder="Species (comma-separated, optional)"
           value={speciesRaw}
           onChange={(e) => setSpeciesRaw(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+          className={formInputClass}
         />
         <button
           type="submit"
           disabled={busy || !draftLngLat || !file}
-          className="rounded-md bg-violet-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-violet-800 disabled:opacity-50"
+          className="mt-0.5 rounded-xl bg-violet-700 px-3 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-violet-800 disabled:opacity-50"
         >
           Save catch to map
         </button>
       </form>
       {message ? (
-        <p className="text-xs text-zinc-600 dark:text-zinc-400">{message}</p>
+        <p className="rounded-lg bg-zinc-100 px-2 py-1.5 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+          {message}
+        </p>
       ) : null}
     </div>
   );

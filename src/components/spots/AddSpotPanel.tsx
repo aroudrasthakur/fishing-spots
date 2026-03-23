@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import {
   createBrowserSupabase,
   isSupabaseConfigured,
 } from "@/lib/supabase/client";
+import { formCardClass, formInputClass } from "@/components/ui/form-classes";
 
 type AddSpotPanelProps = {
   pickLocationMode: boolean;
@@ -105,22 +107,31 @@ export function AddSpotPanel({
 
   if (!user) {
     return (
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">
-        Sign in to drop your own fishing pins on the map.
-      </p>
+      <div className={formCardClass}>
+        <p className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+          <Link
+            href="/auth/sign-in"
+            className="font-semibold text-emerald-800 underline hover:text-emerald-900 dark:text-emerald-400"
+          >
+            Sign in
+          </Link>{" "}
+          to drop your own fishing pins on the map.
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 text-sm">
+    <div className={`${formCardClass} flex flex-col gap-3 text-sm`}>
+      <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">Community spots</p>
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onTogglePickMode}
           className={
             pickLocationMode
-              ? "rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
-              : "rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              ? "rounded-xl bg-amber-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-amber-700"
+              : "rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-800 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
           }
         >
           {pickLocationMode ? "Cancel pin drop" : "Drop pin on map"}
@@ -145,43 +156,45 @@ export function AddSpotPanel({
         </p>
       ) : null}
 
-      <form className="flex flex-col gap-2" onSubmit={submit}>
+      <form className="flex flex-col gap-2.5" onSubmit={submit}>
         <input
           required
           placeholder="Spot title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+          className={formInputClass}
         />
         <textarea
           placeholder="Notes (optional)"
           rows={2}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+          className={`${formInputClass} resize-y`}
         />
         <input
           placeholder="Species (comma-separated, optional)"
           value={speciesRaw}
           onChange={(e) => setSpeciesRaw(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+          className={formInputClass}
         />
         <input
           placeholder="Access type (e.g. bank, boat ramp)"
           value={accessType}
           onChange={(e) => setAccessType(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+          className={formInputClass}
         />
         <button
           type="submit"
           disabled={busy || !draftLngLat}
-          className="rounded-md bg-emerald-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+          className="mt-0.5 rounded-xl bg-emerald-700 px-3 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
         >
           Save spot
         </button>
       </form>
       {message ? (
-        <p className="text-xs text-zinc-600 dark:text-zinc-400">{message}</p>
+        <p className="rounded-lg bg-zinc-100 px-2 py-1.5 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+          {message}
+        </p>
       ) : null}
     </div>
   );

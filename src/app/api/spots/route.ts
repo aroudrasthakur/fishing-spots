@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
+import { isLngLatInUsa } from "@/lib/usa";
 import { isSupabaseConfigured, createServerSupabase } from "@/lib/supabase/server";
 import { rowToSpotFeature } from "@/lib/spots";
 import type { SpotFeatureCollection } from "@/types/spot";
@@ -12,7 +13,7 @@ function loadSeed(): SpotFeatureCollection {
     process.cwd(),
     "public",
     "data",
-    "texas-spots-seed.geojson",
+    "us-spots-seed.geojson",
   );
   const raw = readFileSync(file, "utf-8");
   return JSON.parse(raw) as SpotFeatureCollection;
@@ -98,9 +99,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (lon < -106.8 || lon > -93.4 || lat < 25.7 || lat > 36.6) {
+  if (!isLngLatInUsa(lon, lat)) {
     return NextResponse.json(
-      { error: "Coordinates must fall within Texas (approximate bounds)" },
+      { error: "Coordinates must fall within the United States (approximate bounds)" },
       { status: 400 },
     );
   }

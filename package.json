@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "build:hydro": "node data/pipeline/build-texas-hydro.mjs"
+    "build:hydro": "node data/pipeline/build-us-hydro.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",

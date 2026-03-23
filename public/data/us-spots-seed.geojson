@@ -1,0 +1,93 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-97.7575, 30.2672] },
+      "properties": {
+        "title": "Lady Bird Lake (Austin, TX)",
+        "description": "Urban reservoir; popular for kayak and bank fishing. Check local angler rules.",
+        "species": ["largemouth bass", "sunfish", "catfish"],
+        "access_type": "bank / paddle",
+        "source": "seed"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-96.797, 32.777] },
+      "properties": {
+        "title": "White Rock Lake (Dallas, TX)",
+        "description": "City-managed lake with bank access and piers; verify park hours.",
+        "species": ["largemouth bass", "crappie", "catfish"],
+        "access_type": "bank / pier",
+        "source": "seed"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-95.3698, 29.7604] },
+      "properties": {
+        "title": "Galveston Bay area (TX)",
+        "description": "Saltwater and brackish options; check state saltwater regulations.",
+        "species": ["red drum", "speckled trout", "flounder"],
+        "access_type": "pier / wade / boat",
+        "source": "seed"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-87.616, 41.894] },
+      "properties": {
+        "title": "Lake Michigan (Chicago lakefront)",
+        "description": "Harbor and nearshore fishing; verify Illinois / local access and licensing.",
+        "species": ["coho salmon", "perch", "smallmouth bass"],
+        "access_type": "pier / shore",
+        "source": "seed"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-80.85, 25.25] },
+      "properties": {
+        "title": "Everglades / Florida Bay (FL)",
+        "description": "Shallow flats and backcountry; confirm federal and state park rules.",
+        "species": ["snook", "tarpon", "redfish"],
+        "access_type": "boat / wade",
+        "source": "seed"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-122.4194, 37.808] },
+      "properties": {
+        "title": "San Francisco Bay piers (CA)",
+        "description": "Urban saltwater pier fishing; check California DFW regulations.",
+        "species": ["halibut", "striped bass", "leopard shark"],
+        "access_type": "pier",
+        "source": "seed"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-149.9, 61.22] },
+      "properties": {
+        "title": "Ship Creek (Anchorage, AK)",
+        "description": "Urban salmon fishery; review Alaska Sport Fishing regulations.",
+        "species": ["chinook salmon", "coho salmon"],
+        "access_type": "bank",
+        "source": "seed"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-157.86, 21.28] },
+      "properties": {
+        "title": "South Shore Oʻahu (HI)",
+        "description": "Reef and shore opportunities; respect DLNR rules and marine preserves.",
+        "species": ["bonefish", "trevally", "reef fish"],
+        "access_type": "shore",
+        "source": "seed"
+      }
+    }
+  ]
+}

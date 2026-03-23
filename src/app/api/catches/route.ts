@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { rowToCatchFeature } from "@/lib/catches";
+import { isLngLatInUsa } from "@/lib/usa";
 import { isSupabaseConfigured, createServerSupabase } from "@/lib/supabase/server";
 import type { CatchFeatureCollection } from "@/types/catch";
 
@@ -110,9 +111,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (lon < -106.8 || lon > -93.4 || lat < 25.7 || lat > 36.6) {
+  if (!isLngLatInUsa(lon, lat)) {
     return NextResponse.json(
-      { error: "Coordinates must fall within Texas (approximate bounds)" },
+      { error: "Coordinates must fall within the United States (approximate bounds)" },
       { status: 400 },
     );
   }

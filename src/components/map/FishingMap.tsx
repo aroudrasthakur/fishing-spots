@@ -2,6 +2,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
+import type { Map as MapLibreMap } from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Map, {
   Layer,
@@ -10,32 +11,118 @@ import Map, {
   Source,
   type MapLayerMouseEvent,
 } from "react-map-gl/maplibre";
-import { SATELLITE_BASE_STYLE } from "@/lib/satellite-map-style";
-import { TEXAS_BOUNDS, TEXAS_INITIAL_VIEW } from "@/lib/texas";
+import {
+  applyLightMapWaterStyle,
+  CARTO_POSITRON_STYLE_URL,
+} from "@/lib/light-map-water";
+import { USA_BOUNDS, USA_INITIAL_VIEW } from "@/lib/usa";
 import type { CatchFeature, CatchFeatureCollection } from "@/types/catch";
 import type { SpotFeature, SpotFeatureCollection } from "@/types/spot";
 
-const lakeFillLayer = {
-  id: "texas-hydro-lake",
-  type: "fill" as const,
-  paint: {
-    "fill-color": "#38bdf8",
-    "fill-opacity": 0.38,
-  },
-};
+/**
+ * Lake zones come from build-us-hydro (negative buffers): shallow = near shore, deep = interior.
+ * _depth_rank still nudges overall tone (bigger water → slightly darker).
+ */
+const lakeShallowFillPaint = {
+  "fill-color": "#c4f0ff",
+  "fill-opacity": 0.9,
+} as const;
 
-const riverLineLayer = {
-  id: "texas-hydro-river",
-  type: "line" as const,
-  paint: {
-    "line-color": "#e0f2fe",
-    "line-width": 1.6,
-  },
-};
+const lakeMidFillPaint = {
+  "fill-color": [
+    "interpolate",
+    ["linear"],
+    ["coalesce", ["to-number", ["get", "_depth_rank"]], 3],
+    1,
+    "#7fdcf2",
+    3,
+    "#3cbde0",
+    6,
+    "#1580a3",
+  ],
+  "fill-opacity": 0.93,
+} as const;
+
+const lakeDeepFillPaint = {
+  "fill-color": [
+    "interpolate",
+    ["linear"],
+    ["coalesce", ["to-number", ["get", "_depth_rank"]], 3],
+    1,
+    "#4ab8d4",
+    3,
+    "#0d7a9a",
+    6,
+    "#021f2a",
+  ],
+  "fill-opacity": 0.96,
+} as const;
+
+const lakeUniformFillPaint = {
+  "fill-color": [
+    "interpolate",
+    ["linear"],
+    ["coalesce", ["to-number", ["get", "_depth_rank"]], 3],
+    1,
+    "#9ee8f8",
+    3,
+    "#35b8dc",
+    6,
+    "#063747",
+  ],
+  "fill-opacity": 0.92,
+} as const;
+
+/** Same centerline, three widths: outer halo = shallow banks, inner = channel */
+const riverRankScale = [
+  "match",
+  ["coalesce", ["to-number", ["get", "_depth_rank"]], 3],
+  1,
+  0.9,
+  2,
+  1.2,
+  3,
+  1.65,
+  4,
+  2.15,
+  5,
+  2.75,
+  1.65,
+] as const;
+
+const riverShallowLinePaint = {
+  "line-color": "#c5f1ff",
+  "line-width": ["*", 3.8, riverRankScale],
+  "line-opacity": 0.36,
+  "line-blur": 0.45,
+} as const;
+
+const riverMidLinePaint = {
+  "line-color": "#5ecfef",
+  "line-width": ["*", 2.15, riverRankScale],
+  "line-opacity": 0.62,
+  "line-blur": 0.2,
+} as const;
+
+const riverDeepLinePaint = {
+  "line-color": [
+    "interpolate",
+    ["linear"],
+    ["coalesce", ["to-number", ["get", "_depth_rank"]], 3],
+    1,
+    "#2aa3c4",
+    3,
+    "#0a6f8c",
+    6,
+    "#023544",
+  ],
+  "line-width": ["*", 1, riverRankScale],
+  "line-opacity": 0.98,
+} as const;
 
 const spotCirclePaint = {
   "circle-radius": 7,
-  "circle-stroke-width": 1.5,
+  "circle-stroke-width": 2,
   "circle-stroke-color": "#ffffff",
 } as const;
 
@@ -43,10 +130,10 @@ const catchCirclePaint = {
   "circle-radius": 8,
   "circle-stroke-width": 2,
   "circle-stroke-color": "#ffffff",
-  "circle-color": "#7c3aed",
+  "circle-color": "#7c5cf0",
 } as const;
 
-type TexasFishingMapProps = {
+type FishingMapProps = {
   onMapPick?: (lng: number, lat: number) => void;
   pickLocationMode?: boolean;
   /** Increment to refetch spots from /api/spots */
@@ -55,12 +142,12 @@ type TexasFishingMapProps = {
   catchesRefreshKey?: number;
 };
 
-export function TexasFishingMap({
+export function FishingMap({
   onMapPick,
   pickLocationMode = false,
   spotsRefreshKey = 0,
   catchesRefreshKey = 0,
-}: TexasFishingMapProps) {
+}: FishingMapProps) {
   const [hydro, setHydro] = useState<GeoJSON.FeatureCollection | null>(null);
   const [spots, setSpots] = useState<SpotFeatureCollection | null>(null);
   const [catches, setCatches] = useState<CatchFeatureCollection | null>(null);
@@ -72,7 +159,7 @@ export function TexasFishingMap({
     let cancelled = false;
     (async () => {
       try {
-        const hydroRes = await fetch("/data/texas-hydro.geojson");
+        const hydroRes = await fetch("/data/us-hydro.geojson");
         if (!hydroRes.ok) throw new Error("Failed to load water data");
         const hydroJson = (await hydroRes.json()) as GeoJSON.FeatureCollection;
         if (!cancelled) setHydro(hydroJson);
@@ -152,6 +239,10 @@ export function TexasFishingMap({
     return { type: "FeatureCollection" as const, features };
   }, [hydro]);
 
+  const onMapLoad = useCallback((e: { target: MapLibreMap }) => {
+    applyLightMapWaterStyle(e.target);
+  }, []);
+
   const onMapClick = useCallback(
     (e: MapLayerMouseEvent) => {
       if (pickLocationMode && onMapPick) {
@@ -191,7 +282,7 @@ export function TexasFishingMap({
   );
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full bg-gradient-to-br from-slate-50 via-white to-sky-50/30">
       {loadError ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-100/95 p-4 text-center text-sm text-red-800 dark:bg-zinc-900/95 dark:text-red-200">
           {loadError}
@@ -199,31 +290,72 @@ export function TexasFishingMap({
       ) : null}
       <Map
         initialViewState={{
-          longitude: TEXAS_INITIAL_VIEW.longitude,
-          latitude: TEXAS_INITIAL_VIEW.latitude,
-          zoom: TEXAS_INITIAL_VIEW.zoom,
+          longitude: USA_INITIAL_VIEW.longitude,
+          latitude: USA_INITIAL_VIEW.latitude,
+          zoom: USA_INITIAL_VIEW.zoom,
         }}
         style={{ width: "100%", height: "100%", minHeight: 320 }}
-        mapStyle={SATELLITE_BASE_STYLE}
-        maxBounds={TEXAS_BOUNDS}
-        minZoom={4}
+        mapStyle={CARTO_POSITRON_STYLE_URL}
+        maxBounds={USA_BOUNDS}
+        minZoom={2}
         maxZoom={19}
         interactiveLayerIds={
           pickLocationMode ? [] : ["catches", "spots-user", "spots-seed"]
         }
         cursor={pickLocationMode ? "crosshair" : "grab"}
+        onLoad={onMapLoad}
         onClick={onMapClick}
       >
         <NavigationControl position="top-left" showCompass={false} />
 
         {hydroLakes && hydroLakes.features.length > 0 ? (
-          <Source id="texas-hydro-lakes" type="geojson" data={hydroLakes}>
-            <Layer {...lakeFillLayer} />
+          <Source id="us-hydro-lakes" type="geojson" data={hydroLakes}>
+            <Layer
+              id="us-hydro-lake-shallow"
+              type="fill"
+              filter={["==", ["get", "_hydro_zone"], "shallow"]}
+              paint={lakeShallowFillPaint as never}
+            />
+            <Layer
+              id="us-hydro-lake-mid"
+              type="fill"
+              filter={["==", ["get", "_hydro_zone"], "mid"]}
+              paint={lakeMidFillPaint as never}
+            />
+            <Layer
+              id="us-hydro-lake-deep"
+              type="fill"
+              filter={["==", ["get", "_hydro_zone"], "deep"]}
+              paint={lakeDeepFillPaint as never}
+            />
+            <Layer
+              id="us-hydro-lake-uniform"
+              type="fill"
+              filter={["==", ["get", "_hydro_zone"], "uniform"]}
+              paint={lakeUniformFillPaint as never}
+            />
           </Source>
         ) : null}
         {hydroRivers && hydroRivers.features.length > 0 ? (
-          <Source id="texas-hydro-rivers" type="geojson" data={hydroRivers}>
-            <Layer {...riverLineLayer} />
+          <Source id="us-hydro-rivers" type="geojson" data={hydroRivers}>
+            <Layer
+              id="us-hydro-river-shallow"
+              type="line"
+              filter={["==", ["get", "_hydro_zone"], "shallow"]}
+              paint={riverShallowLinePaint as never}
+            />
+            <Layer
+              id="us-hydro-river-mid"
+              type="line"
+              filter={["==", ["get", "_hydro_zone"], "mid"]}
+              paint={riverMidLinePaint as never}
+            />
+            <Layer
+              id="us-hydro-river-deep"
+              type="line"
+              filter={["==", ["get", "_hydro_zone"], "deep"]}
+              paint={riverDeepLinePaint as never}
+            />
           </Source>
         ) : null}
 
