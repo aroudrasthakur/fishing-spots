@@ -25,31 +25,23 @@ export function LegalFooter() {
           .
         </p>
         <p>
-          <strong className="text-zinc-800 dark:text-zinc-200">Disclaimer:</strong> Map pins and
-          descriptions are community or demo information, not legal or safety advice. Confirm
-          access, seasons, bag limits, and licensing before fishing.
+          <strong className="text-zinc-800 dark:text-zinc-200">Disclaimer:</strong> Map pins,
+          catch photos, and descriptions are community or demo information, not legal or safety
+          advice. Confirm access, seasons, bag limits, and licensing before fishing.
         </p>
         <p>
-          <strong className="text-zinc-800 dark:text-zinc-200">Data attribution:</strong> Basemap
-          ©{" "}
+          <strong className="text-zinc-800 dark:text-zinc-200">Data attribution:</strong> Satellite
+          and reference layers ©{" "}
           <a
-            href="https://www.openstreetmap.org/copyright"
+            href="https://www.esri.com/en-us/legal/terms/data-attributions"
             className="underline"
             target="_blank"
             rel="noopener noreferrer"
           >
-            OpenStreetMap
-          </a>{" "}
-          contributors, ©{" "}
-          <a
-            href="https://carto.com/attributions"
-            className="underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            CARTO
+            Esri
           </a>
-          . Texas water outlines are derived from{" "}
+          , Maxar, Earthstar Geographics, and the GIS User Community. Texas water outlines are
+          derived from{" "}
           <a
             href="https://www.naturalearthdata.com/"
             className="underline"
